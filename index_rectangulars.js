@@ -109,6 +109,8 @@ void main () {
 
     vColor = aColor;
 }`// gl_Position here I do the mathematics with position which is a vec3 attribute to apply the uniform
+
+
 var fragShader = `
 precision mediump float;
 

@@ -45,9 +45,9 @@ const points = [// we should flatten this array
     [n, -r, 3.0 ],
     [-r, -r, 2.0],
 
-    [-r, -r, 2.0],
-    [n, r,5.0],
-    [-r,r,3.0]
+    [-r, -r, 5.0],
+    [n, r,3.0],
+    [-r,r,2.0]
 
     
 ]
@@ -117,7 +117,7 @@ void main () {
    // pos.x +=sin(uTime)*movingRange;
     //pos.y += cos(uTime)* movingRange;
      float z = sin(uTranslate.x+ uTranslate.y * uTime * 2.0);
-    //  pos.z += z*0.05;
+     pos.z += z*0.05;
   
     gl_Position = uProjectionMatrix * uViewMatrix*vec4(pos, 1.0) ;// if you put first viewMatrix get another result 
 
@@ -138,15 +138,12 @@ void main(){
     float gradient = smoothstep(0.48,0.5, d);
 
     vec4 colorBg = vec4(0.6, 1, 0 ,0.2);
-    vec4 colorDot = vec4(1.0, 0.0, 0.0,0.8);
+    vec4 colorDot = vec4(0.0, 0.0, 0.0, 0.8);
 
     // google glsl mix
     vec4 color = mix(colorDot, colorBg, gradient);
 
     gl_FragColor = color; // gl_FragColor = vec4(vUV,1.0,1.0);
-
-    //gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);// the last is alpha and makes it a cirlce
-    
     
 }`
 
@@ -197,8 +194,6 @@ function clear() {// clear the background
 }
 
 
-var trace = true;
-
 function render() {//name  and define the function-like void draw
     //console.log('render')
     let cameraX= Math.sin(currTime)
@@ -218,7 +213,7 @@ function render() {//name  and define the function-like void draw
     
     clear()//clearing the background
 
-    var start = -7;
+
     for (var i=0 ; i<10 ; i++) {
         for (var j=0 ; j<10 ; j++){
             for (var h=0 ; h<3; h++){
@@ -228,10 +223,6 @@ function render() {//name  and define the function-like void draw
             time : currTime,
             view : viewMatrix,
             translate : [j*(1.5+Math.sin(currTime *2.00) *0.3),i*(1.5+Math.sin(currTime *2.00) *0.3),0]//
-        }
-
-        if(trace) {
-            console.log(obj.translate[0], obj.translate[1])
         }
 
         drawTriangle(obj)}
@@ -246,8 +237,6 @@ function render() {//name  and define the function-like void draw
         drawTriangle(obj1)*/
 
      }
-
-     trace = false;
 
     window.requestAnimationFrame(render)
 }

@@ -1,5 +1,10 @@
 const regl = require('regl')()
  const glm = require('gl-matrix')
+
+ console.log('here')
+ const strVertex = require('./shaders/shaderVertex.js')// call vertex the shaders
+ const strFrag = require('./shaders/shaderFrag.js')// call the frag shaders
+ console.log('strVertex, strVertex')
  
 //var str = `test`;
 
@@ -15,7 +20,9 @@ mat4.lookAt(viewMatrix,[0,0,2], [0,0,0],[0,1,0]) //mat4.lookAt(out,eye, center,u
 
 //console.log(projectionMatrix)//println
 
-var currTime =0;
+var currTime =0.9;
+
+
 
 var mouseX = 0
 var mouseY =0
@@ -38,16 +45,20 @@ window.addEventListener('mousemove', function(e)/// e for event-- event handlere
 })/// write window in console-then event - write the same here
 
 
-var r = 0.6;
-var n = 0.6;
-const points = [// we should flatten this array
-    [n, r, 5.0],
-    [n, -r, 3.0 ],
-    [-r, -r, 2.0],
+var r =Math.sin(currTime)*0.09;
+var n =Math.sin(currTime)*0.09;
 
-    [-r, -r, 2.0],
-    [n, r,5.0],
-    [-r,r,3.0]
+/*var r = 0.3;
+var n = 0.3;*/
+const points = [// we should flatten this array
+   
+    [n, r, 0.0],
+    [n, -r, 0.0],
+    [-r, -r, 0.0],
+
+    [-r, -r, 0.0],
+    [n, r,0.0],
+    [-r,r,0.0]
 
     
 ]
@@ -94,63 +105,6 @@ var uvs = [
 }
   
 
-var vertexShader = `
-precision mediump float;
-attribute vec3 position;
-attribute vec3 aColor;
-attribute vec2 aUV;
-
-uniform float uTime;
-uniform mat4 uProjectionMatrix;
-uniform mat4 uViewMatrix;
-uniform vec3 uTranslate;
-
-varying vec3 vColor;
-varying vec2 vUV;
-
-void main () {
-    //create a holder for position
-    vec3 pos= position+ uTranslate;// to move the position
-    
-    //add time to the x only
-    float movingRange=0.2;
-   // pos.x +=sin(uTime)*movingRange;
-    //pos.y += cos(uTime)* movingRange;
-     float z = sin(uTranslate.x+ uTranslate.y * uTime * 2.0);
-    //  pos.z += z*0.05;
-  
-    gl_Position = uProjectionMatrix * uViewMatrix*vec4(pos, 1.0) ;// if you put first viewMatrix get another result 
-
-   
-     vColor = aColor;
-     vUV = aUV;
-}`// gl_Position here I do the mathematics with position which is a vec3 attribute to apply the uniform
-var fragShader = `
-precision mediump float;
-
-varying vec3 vColor;
-varying vec2 vUV;
-
-void main(){
-    vec2 center = vec2(0.5,0.5);
-    float d = distance (vUV, center);
-
-    float gradient = smoothstep(0.48,0.5, d);
-
-    vec4 colorBg = vec4(0.6, 1, 0 ,0.2);
-    vec4 colorDot = vec4(1.0, 0.0, 0.0,0.8);
-
-    // google glsl mix
-    vec4 color = mix(colorDot, colorBg, gradient);
-
-    gl_FragColor = color; // gl_FragColor = vec4(vUV,1.0,1.0);
-
-    //gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);// the last is alpha and makes it a cirlce
-    
-    
-}`
-
-
 //console.log('Attribute:', attributes)
 
 const drawTriangle = regl(/// this is the object in which put attributes-uniforms-shaders etc
@@ -164,8 +118,8 @@ const drawTriangle = regl(/// this is the object in which put attributes-uniform
 
     },
    
-    frag:fragShader,
-    vert: vertexShader, 
+    frag: strFrag,//define the shader you use
+    vert: strVertex, //define the shader you use
     
     blend: {
         enable: true,
@@ -197,17 +151,21 @@ function clear() {// clear the background
 }
 
 
-var trace = true;
-
 function render() {//name  and define the function-like void draw
     //console.log('render')
-    let cameraX= Math.sin(currTime)
+    //let cameraX= Math.sin(currTime)
     //let cameraY = Math.sin(currTime)
-    let cameraZ = Math.cos(currTime)
+   // let cameraZ = Math.cos(currTime)
     
     //console.log(cameraX)
     currTime += 0.01
-    mat4.lookAt(viewMatrix,[mouseX,mouseY,20], [0,0,0],[0,1,0])//here specify the zoom 
+    
+    var cameraRadius = 5.0
+  var cameraX = Math.sin(currTime) * cameraRadius
+  var cameraZ = Math.cos(currTime) * cameraRadius
+
+  mat4.lookAt(viewMatrix, [cameraX, 0, cameraZ], [0, 0, 0], [0, 1, 0])
+  //  mat4.lookAt(viewMatrix,[mouseX,mouseY,20], [0,0,0],[0,1,0])//here specify the zoom 
     
    /* const obj = {
         time : currTime,
@@ -218,23 +176,23 @@ function render() {//name  and define the function-like void draw
     
     clear()//clearing the background
 
-    var start = -7;
-    for (var i=0 ; i<10 ; i++) {
-        for (var j=0 ; j<10 ; j++){
-            for (var h=0 ; h<3; h++){
+    var num = 10
+    var start = -num / 2
 
+    for (var i=0 ; i<num ; i++) {
+        for (var j=0 ; j<num ; j++){
+        
+            for (var h=0 ; h<num ; h++){
        
         var obj = {
             time : currTime,
             view : viewMatrix,
-            translate : [j*(1.5+Math.sin(currTime *2.00) *0.3),i*(1.5+Math.sin(currTime *2.00) *0.3),0]//
+            translate: [start + i, start + j, h + start],
+           
         }
 
-        if(trace) {
-            console.log(obj.translate[0], obj.translate[1])
-        }
-
-        drawTriangle(obj)}
+      drawTriangle(obj)}
+    }
     
     }
         /*var obj1 = {
@@ -245,9 +203,7 @@ function render() {//name  and define the function-like void draw
 
         drawTriangle(obj1)*/
 
-     }
-
-     trace = false;
+     
 
     window.requestAnimationFrame(render)
 }
